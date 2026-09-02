@@ -2,24 +2,27 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>J.A.R.V.I.S — Interface</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>J.A.R.V.I.S — Console</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --void:#050a11;
-    --panel:#081420;
-    --panel-2:#0a1a29;
-    --line:#163040;
-    --line-bright:#245268;
-    --cyan:#54d9ff;
-    --cyan-dim:#2b8aa8;
-    --amber:#ffb454;
-    --red:#ff5d5d;
-    --text:#d7ecf5;
-    --text-dim:#5d7c8c;
-    --text-faint:#365164;
+    --void:#07080b;
+    --panel:#0e121a;
+    --panel-2:#141a24;
+    --line:rgba(255,255,255,0.07);
+    --line-bright:rgba(217,169,98,0.4);
+    --brass:#d9a962;
+    --brass-soft:#f2cf98;
+    --brass-dim:#7c6136;
+    --teal:#4ad3c4;
+    --teal-dim:#276f68;
+    --alert:#ffb454;
+    --red:#ff5c5c;
+    --text:#eef1f5;
+    --text-dim:#8992a1;
+    --text-faint:#4b5361;
   }
 
   *{box-sizing:border-box; margin:0; padding:0;}
@@ -32,38 +35,39 @@
     height:100%;
     background:var(--void);
     color:var(--text);
-    font-family:'Rajdhani', sans-serif;
-    overflow:hidden;
+    font-family:'Space Grotesk', sans-serif;
   }
 
   body{
     background-image:
-      linear-gradient(var(--line) 1px, transparent 1px),
-      linear-gradient(90deg, var(--line) 1px, transparent 1px);
-    background-size:56px 56px;
+      radial-gradient(rgba(217,169,98,0.10) 1px, transparent 1px),
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size:26px 26px, 208px 208px, 208px 208px;
     background-position:center;
     background-color:var(--void);
     position:relative;
+    min-height:100%;
   }
 
   body::before{
     content:"";
-    position:absolute; inset:0;
-    background:radial-gradient(ellipse at center, transparent 0%, rgba(5,10,17,0.55) 55%, var(--void) 100%);
+    position:fixed; inset:0;
+    background:radial-gradient(ellipse at 50% 40%, transparent 0%, rgba(7,8,11,0.5) 55%, var(--void) 100%);
     pointer-events:none;
     z-index:1;
   }
 
-  .mono{ font-family:'JetBrains Mono', monospace; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
 
   /* ================= SHELL ================= */
   .shell{
     position:relative;
     z-index:2;
-    height:100vh;
+    min-height:100vh;
     display:grid;
     grid-template-rows:auto 1fr auto;
-    padding:22px 28px 18px;
+    padding:20px 26px 16px;
     gap:14px;
   }
 
@@ -74,6 +78,8 @@
     justify-content:space-between;
     border-bottom:1px solid var(--line);
     padding-bottom:12px;
+    gap:12px;
+    flex-wrap:wrap;
   }
   .brand{
     display:flex;
@@ -81,32 +87,32 @@
     gap:12px;
   }
   .brand .mark{
-    font-size:22px;
+    font-size:21px;
     font-weight:700;
-    letter-spacing:0.14em;
+    letter-spacing:0.1em;
     color:var(--text);
   }
-  .brand .mark span{ color:var(--cyan); }
+  .brand .mark span{ color:var(--brass); }
   .brand .sub{
-    font-size:12px;
+    font-size:11.5px;
     color:var(--text-dim);
-    letter-spacing:0.08em;
+    letter-spacing:0.03em;
   }
   .top-readouts{
     display:flex;
-    gap:26px;
+    gap:24px;
     align-items:baseline;
   }
   .readout{ text-align:right; }
   .readout .val{
-    font-size:15px;
-    color:var(--cyan);
-    letter-spacing:0.04em;
+    font-size:14.5px;
+    color:var(--brass-soft);
+    letter-spacing:0.03em;
   }
   .readout .lbl{
-    font-size:10.5px;
+    font-size:10px;
     color:var(--text-faint);
-    letter-spacing:0.14em;
+    letter-spacing:0.13em;
     text-transform:uppercase;
     margin-top:2px;
   }
@@ -114,8 +120,8 @@
   /* ---------- MAIN GRID ---------- */
   .main{
     display:grid;
-    grid-template-columns:250px 1fr 320px;
-    gap:20px;
+    grid-template-columns:240px 1fr 310px;
+    gap:18px;
     min-height:0;
   }
 
@@ -127,11 +133,33 @@
     min-height:0;
     display:flex;
     flex-direction:column;
+    position:relative;
+    overflow:hidden;
+  }
+  .panel::after{
+    content:"";
+    position:absolute; top:0; left:0; width:100%; height:1px;
+    background:linear-gradient(90deg, var(--line-bright), transparent 60%);
+    opacity:0.7;
+  }
+  .panel::before{
+    content:"";
+    position:absolute; top:0; left:-30%; width:22%; height:100%;
+    background:linear-gradient(90deg, transparent, rgba(217,169,98,0.1), transparent);
+    transform:skewX(-15deg);
+    animation:panelSweep 9s ease-in-out infinite;
+    pointer-events:none;
+  }
+  @keyframes panelSweep{
+    0%{ left:-30%; opacity:0; }
+    4%{ opacity:1; }
+    14%{ left:120%; opacity:0; }
+    100%{ left:120%; opacity:0; }
   }
 
   .panel-title{
-    font-size:11px;
-    letter-spacing:0.16em;
+    font-size:10.5px;
+    letter-spacing:0.15em;
     text-transform:uppercase;
     color:var(--text-dim);
     display:flex;
@@ -143,39 +171,73 @@
   .panel-title::before{
     content:"";
     width:6px; height:6px;
-    background:var(--cyan);
-    box-shadow:0 0 6px var(--cyan);
+    background:var(--brass);
+    box-shadow:0 0 6px var(--brass);
     flex-shrink:0;
   }
 
   /* ---------- LEFT: DIAGNOSTICS ---------- */
-  .diag-item{ margin-bottom:16px; }
-  .diag-item .row{
-    display:flex; justify-content:space-between;
-    font-size:12px;
-    color:var(--text-dim);
-    margin-bottom:6px;
-    letter-spacing:0.03em;
+  .gauges{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-bottom:16px;
   }
-  .diag-item .row b{ color:var(--text); font-weight:500; }
-  .bar{
-    height:5px;
-    background:#0d1e2b;
-    border:1px solid var(--line);
+  .gauge{
     position:relative;
-    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:6px 0 2px;
   }
-  .bar i{
-    display:block; height:100%;
-    background:linear-gradient(90deg, var(--cyan-dim), var(--cyan));
-    transition:width 0.6s ease;
+  .gauge svg{ width:88px; height:88px; }
+  .gauge-track{ fill:none; stroke:rgba(255,255,255,0.06); stroke-width:6; }
+  .gauge-arc{ fill:none; stroke-width:6; stroke-linecap:round; stroke-dasharray:314.159; transition:stroke-dashoffset 0.6s ease; }
+  .gauge-num{
+    position:absolute; top:32px; left:0; right:0;
+    text-align:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:14px;
+    color:var(--text);
+  }
+  .gauge-lbl{
+    margin-top:2px;
+    font-size:10px;
+    letter-spacing:0.06em;
+    color:var(--text-dim);
+    text-align:center;
   }
 
-  .divider{
-    height:1px;
-    background:var(--line);
-    margin:6px 0 18px;
+  details.log-details{ flex:1; min-height:0; display:flex; flex-direction:column; }
+  details.log-details summary{
+    list-style:none;
+    cursor:pointer;
+    font-size:10.5px;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 0;
+    border-top:1px solid var(--line);
+    flex-shrink:0;
   }
+  details.log-details summary::-webkit-details-marker{ display:none; }
+  details.log-details summary::before{
+    content:"";
+    width:6px; height:6px;
+    background:var(--teal);
+    box-shadow:0 0 6px var(--teal);
+    flex-shrink:0;
+  }
+  details.log-details summary::after{
+    content:"▸";
+    margin-left:auto;
+    color:var(--text-faint);
+    transition:transform 0.2s ease;
+  }
+  details.log-details[open] summary::after{ transform:rotate(90deg); }
 
   .log-mini{
     flex:1;
@@ -186,7 +248,7 @@
     padding-right:4px;
   }
   .log-mini::-webkit-scrollbar{width:3px;}
-  .log-mini::-webkit-scrollbar-thumb{background:var(--line-bright);}
+  .log-mini::-webkit-scrollbar-thumb{background:var(--brass-dim);}
 
   /* ---------- CENTER: CORE ---------- */
   .core-panel{
@@ -200,60 +262,70 @@
     position:absolute;
     top:16px;
     left:18px;
-    font-size:11px;
-    letter-spacing:0.16em;
+    font-size:10.5px;
+    letter-spacing:0.15em;
     text-transform:uppercase;
     color:var(--text-dim);
     display:flex; align-items:center; gap:8px;
   }
   .core-status .dot{
     width:6px; height:6px;
-    background:var(--cyan);
-    box-shadow:0 0 6px var(--cyan);
+    background:var(--brass);
+    box-shadow:0 0 6px var(--brass);
     animation:blink 2.4s infinite;
   }
   @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:0.25;} }
 
   .core-wrap{
     position:relative;
-    width:min(360px, 40vh);
-    height:min(360px, 40vh);
+    width:min(360px, 38vh);
+    height:min(360px, 38vh);
     display:flex;
     align-items:center;
     justify-content:center;
+    animation:coreBoot 1.1s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes coreBoot{
+    0%{ opacity:0; transform:scale(0.7) rotate(-24deg); }
+    100%{ opacity:1; transform:scale(1) rotate(0deg); }
   }
 
-  .core-wrap svg{ position:absolute; inset:0; width:100%; height:100%; }
-
-  .ring-outer{ transform-origin:50% 50%; animation:spin 40s linear infinite; }
-  .ring-mid{ transform-origin:50% 50%; animation:spin 26s linear infinite reverse; }
-  .ring-ticks{ transform-origin:50% 50%; animation:spin 90s linear infinite; }
+  .core-wrap svg.bezel{ position:absolute; inset:0; width:100%; height:100%; z-index:0; }
+  .bezel-ring{ transform-origin:50% 50%; animation:spin 120s linear infinite; }
   @keyframes spin{ to{ transform:rotate(360deg); } }
 
-  .core-center{
-    width:34%; height:34%;
-    border-radius:50%;
-    background:radial-gradient(circle at 35% 30%, #d9f7ff, var(--cyan) 40%, #0f4a5c 100%);
-    box-shadow:0 0 40px 6px rgba(84,217,255,0.45), 0 0 90px 20px rgba(84,217,255,0.15);
-    position:relative;
+  #coreCanvas{
+    position:absolute; inset:0;
+    width:100%; height:100%;
     z-index:2;
-    transition:box-shadow 0.4s ease, transform 0.4s ease;
+    pointer-events:none;
   }
-  .core-wrap.listening .core-center{
-    box-shadow:0 0 55px 12px rgba(84,217,255,0.75), 0 0 130px 30px rgba(84,217,255,0.3);
+
+  .core-center{
+    width:30%; height:30%;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #fbe9cc, var(--brass) 45%, #3c2a13 100%);
+    box-shadow:0 0 40px 6px rgba(217,169,98,0.4), 0 0 90px 20px rgba(217,169,98,0.14);
+    position:relative;
+    z-index:1;
+    transition:box-shadow 0.5s ease, background 0.5s ease, transform 0.4s ease;
+  }
+  .core-wrap.active .core-center{
+    background:radial-gradient(circle at 35% 30%, #e8fbf8, var(--teal) 45%, #0d3733 100%);
+    box-shadow:0 0 55px 12px rgba(74,211,196,0.65), 0 0 130px 30px rgba(74,211,196,0.25);
     animation:pulse 1.1s ease-in-out infinite;
   }
-  @keyframes pulse{ 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.06);} }
+  @keyframes pulse{ 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.07);} }
 
   .core-hint{
-    margin-top:22px;
+    margin-top:20px;
     font-size:12px;
     color:var(--text-dim);
-    letter-spacing:0.06em;
+    letter-spacing:0.02em;
     text-align:center;
     min-height:18px;
   }
-  .core-hint b{ color:var(--cyan); font-weight:500; }
+  .core-hint b{ color:var(--brass-soft); font-weight:500; }
 
   /* ---------- RIGHT: CONVERSATION ---------- */
   .convo-panel{ min-height:0; }
@@ -267,33 +339,33 @@
     margin-bottom:14px;
   }
   .convo-feed::-webkit-scrollbar{ width:4px; }
-  .convo-feed::-webkit-scrollbar-thumb{ background:var(--line-bright); }
+  .convo-feed::-webkit-scrollbar-thumb{ background:var(--brass-dim); }
 
   .msg{ max-width:100%; }
   .msg .who{
     font-size:10px;
-    letter-spacing:0.14em;
+    letter-spacing:0.13em;
     text-transform:uppercase;
     margin-bottom:4px;
   }
   .msg.user .who{ color:var(--text-faint); }
-  .msg.jarvis .who{ color:var(--cyan-dim); }
+  .msg.jarvis .who{ color:var(--teal-dim); }
   .msg .text{
     font-size:13.5px;
-    line-height:1.5;
+    line-height:1.55;
     color:var(--text);
     white-space:pre-wrap;
   }
   .msg.user .text{ color:var(--text-dim); }
   .msg.jarvis{
-    border-left:2px solid var(--cyan-dim);
+    border-left:2px solid var(--teal-dim);
     padding-left:10px;
   }
   .msg.system .text{ color:var(--text-faint); font-style:italic; }
   .msg.system{ border-left:2px solid var(--line-bright); padding-left:10px; }
 
   .confirm-card{
-    border:1px solid var(--amber);
+    border:1px solid var(--alert);
     background:rgba(255,180,84,0.06);
     padding:12px 14px;
     margin-top:8px;
@@ -304,7 +376,7 @@
   .confirm-card .body{
     white-space:pre-wrap;
     color:var(--text);
-    font-family:'JetBrains Mono', monospace;
+    font-family:'IBM Plex Mono', monospace;
     font-size:11.5px;
     line-height:1.5;
     max-height:160px;
@@ -320,14 +392,13 @@
     border:1px solid var(--line-bright);
     background:var(--panel-2);
     color:var(--text);
-    font-family:'Rajdhani', sans-serif;
+    font-family:'Space Grotesk', sans-serif;
     font-size:12px;
-    letter-spacing:0.08em;
-    text-transform:uppercase;
+    letter-spacing:0.04em;
     cursor:pointer;
   }
-  .confirm-actions .btn-send{ border-color:var(--cyan); color:var(--cyan); }
-  .confirm-actions .btn-send:hover{ background:rgba(84,217,255,0.12); }
+  .confirm-actions .btn-send{ border-color:var(--teal); color:var(--teal); }
+  .confirm-actions .btn-send:hover{ background:rgba(74,211,196,0.12); }
   .confirm-actions .btn-cancel:hover{ background:rgba(255,93,93,0.1); color:var(--red); border-color:var(--red); }
   .confirm-actions button:disabled{ opacity:0.4; cursor:default; }
 
@@ -341,17 +412,17 @@
     gap:10px;
     clip-path:polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
   }
-  .cmd-bar .caret{ color:var(--cyan); font-size:15px; }
+  .cmd-bar .caret{ color:var(--brass); font-size:15px; }
   .cmd-bar input{
     flex:1;
     background:transparent;
     border:none;
     outline:none;
     color:var(--text);
-    font-family:'JetBrains Mono', monospace;
+    font-family:'IBM Plex Mono', monospace;
     font-size:13.5px;
     padding:12px 0;
-    letter-spacing:0.02em;
+    letter-spacing:0.01em;
   }
   .cmd-bar input::placeholder{ color:var(--text-faint); }
 
@@ -359,19 +430,41 @@
     width:38px; height:38px;
     border:1px solid var(--line-bright);
     background:var(--panel-2);
-    color:var(--cyan);
+    color:var(--brass);
     display:flex; align-items:center; justify-content:center;
     cursor:pointer;
     flex-shrink:0;
     transition:background 0.2s ease, box-shadow 0.2s ease;
   }
-  .mic-btn:hover{ background:#0d2334; }
+  .mic-btn:hover{ background:#1a212c; }
   .mic-btn.active{
-    background:var(--cyan);
-    color:#04141c;
-    box-shadow:0 0 16px rgba(84,217,255,0.6);
+    background:var(--teal);
+    color:#04231f;
+    box-shadow:0 0 16px rgba(74,211,196,0.55);
   }
   .mic-btn svg{ width:16px; height:16px; }
+
+  .core-mic-btn{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:58px; height:58px; border-radius:50%;
+    z-index:3;
+    background:rgba(8,10,14,0.3);
+    border:1px solid rgba(255,255,255,0.28);
+    display:flex; align-items:center; justify-content:center;
+    color:#1c140a;
+    cursor:pointer;
+    transition:transform 0.2s ease, box-shadow 0.3s ease, background 0.3s ease;
+  }
+  .core-mic-btn:hover{ transform:translate(-50%,-50%) scale(1.08); }
+  .core-mic-btn svg{ width:21px; height:21px; }
+  .core-mic-btn.active{
+    background:rgba(10,22,22,0.32);
+    animation:micPulse 1.15s ease-in-out infinite;
+  }
+  @keyframes micPulse{
+    0%,100%{ box-shadow:0 0 0 6px rgba(74,211,196,0.16), 0 0 30px rgba(74,211,196,0.55); }
+    50%{ box-shadow:0 0 0 11px rgba(74,211,196,0.05), 0 0 48px rgba(74,211,196,0.75); }
+  }
 
   .send-btn{
     width:38px; height:38px;
@@ -383,32 +476,54 @@
     flex-shrink:0;
     transition:background 0.2s ease, color 0.2s ease;
   }
-  .send-btn:hover{ background:#0d2334; color:var(--cyan); }
+  .send-btn:hover{ background:#1a212c; color:var(--brass-soft); }
   .send-btn svg{ width:15px; height:15px; }
 
-  ::selection{ background:var(--cyan); color:#04141c; }
+  ::selection{ background:var(--brass); color:#241a0c; }
 
-  /* scrollable areas focus visibility */
   input:focus-visible, .mic-btn:focus-visible, .send-btn:focus-visible{
-    outline:2px solid var(--cyan);
+    outline:2px solid var(--teal);
     outline-offset:2px;
   }
 
+  /* ---------- MOBILE ---------- */
   @media (max-width:980px){
-    .main{ grid-template-columns:1fr; grid-template-rows:auto auto auto; }
-    .shell{ overflow-y:auto; height:auto; min-height:100vh; }
+    .shell{ height:auto; min-height:100vh; padding:16px 14px calc(12px + env(safe-area-inset-bottom)); }
+    .top-readouts{ gap:16px; }
+    .main{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .core-panel{ order:1; padding:14px 10px 6px; }
+    .core-wrap{ width:min(230px, 56vw); height:min(230px, 56vw); }
+    .convo-panel{ order:2; flex:1 1 auto; min-height:280px; }
+    .diag-panel{ order:3; }
+    .gauges{ grid-template-columns:repeat(4, minmax(72px,1fr)); overflow-x:auto; gap:8px; }
+    .gauge svg{ width:64px; height:64px; }
+    .gauge-num{ top:22px; font-size:11px; }
+    .gauge-lbl{ font-size:8.5px; }
+    .cmd-bar{ position:sticky; bottom:8px; }
   }
 </style>
 </head>
 <body>
+
+<div id="bootOverlay">
+  <div class="boot-mark">J<span>·</span>A<span>·</span>R<span>·</span>V<span>·</span>I<span>·</span>S</div>
+  <div class="boot-line mono" style="animation-delay:0.15s">Powering core reactor…</div>
+  <div class="boot-line mono" style="animation-delay:0.55s">Calibrating sensor array…</div>
+  <div class="boot-line mono" style="animation-delay:0.95s">Linking voice systems…</div>
+  <div class="boot-bar"><i></i></div>
+</div>
 
 <div class="shell">
 
   <!-- TOP BAR -->
   <div class="topbar">
     <div class="brand">
-      <div class="mark">J<span>.</span>A<span>.</span>R<span>.</span>V<span>.</span>I<span>.</span>S</div>
-      <div class="sub mono">PERSONAL INTERFACE — BUILD 4.1</div>
+      <div class="mark">J<span>·</span>A<span>·</span>R<span>·</span>V<span>·</span>I<span>·</span>S</div>
+      <div class="sub mono">Personal interface, rev 4.2</div>
     </div>
     <div class="top-readouts">
       <div class="readout">
@@ -420,7 +535,7 @@
         <div class="lbl">Date</div>
       </div>
       <div class="readout">
-        <div class="val mono" style="color:var(--amber)" id="statusVal">Standby</div>
+        <div class="val mono" style="color:var(--alert)" id="statusVal">Standby</div>
         <div class="lbl">System Status</div>
       </div>
     </div>
@@ -430,43 +545,67 @@
   <div class="main">
 
     <!-- LEFT PANEL -->
-    <div class="panel">
+    <div class="panel diag-panel">
       <div class="panel-title">Diagnostics</div>
 
-      <div class="diag-item">
-        <div class="row"><span>Core Power</span><b id="d-power">92%</b></div>
-        <div class="bar"><i id="b-power" style="width:92%"></i></div>
-      </div>
-      <div class="diag-item">
-        <div class="row"><span>Processing Load</span><b id="d-load">18%</b></div>
-        <div class="bar"><i id="b-load" style="width:18%"></i></div>
-      </div>
-      <div class="diag-item">
-        <div class="row"><span>Network Link</span><b id="d-net">100%</b></div>
-        <div class="bar"><i id="b-net" style="width:100%"></i></div>
-      </div>
-      <div class="diag-item">
-        <div class="row"><span>Memory Array</span><b id="d-mem">64%</b></div>
-        <div class="bar"><i id="b-mem" style="width:64%"></i></div>
+      <div class="gauges">
+        <div class="gauge">
+          <svg viewBox="0 0 120 120">
+            <circle class="gauge-track" cx="60" cy="60" r="50"/>
+            <circle class="gauge-arc" id="power-arc" cx="60" cy="60" r="50" stroke="var(--brass)" stroke-dashoffset="28" transform="rotate(-90 60 60)"/>
+          </svg>
+          <div class="gauge-num" id="power-num">92%</div>
+          <div class="gauge-lbl">Core Power</div>
+        </div>
+        <div class="gauge">
+          <svg viewBox="0 0 120 120">
+            <circle class="gauge-track" cx="60" cy="60" r="50"/>
+            <circle class="gauge-arc" id="load-arc" cx="60" cy="60" r="50" stroke="var(--teal)" stroke-dashoffset="257" transform="rotate(-90 60 60)"/>
+          </svg>
+          <div class="gauge-num" id="load-num">18%</div>
+          <div class="gauge-lbl">Proc. Load</div>
+        </div>
+        <div class="gauge">
+          <svg viewBox="0 0 120 120">
+            <circle class="gauge-track" cx="60" cy="60" r="50"/>
+            <circle class="gauge-arc" id="net-arc" cx="60" cy="60" r="50" stroke="var(--brass)" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+          </svg>
+          <div class="gauge-num" id="net-num">100%</div>
+          <div class="gauge-lbl">Network</div>
+        </div>
+        <div class="gauge">
+          <svg viewBox="0 0 120 120">
+            <circle class="gauge-track" cx="60" cy="60" r="50"/>
+            <circle class="gauge-arc" id="mem-arc" cx="60" cy="60" r="50" stroke="var(--teal)" stroke-dashoffset="113" transform="rotate(-90 60 60)"/>
+          </svg>
+          <div class="gauge-num" id="mem-num">64%</div>
+          <div class="gauge-lbl">Memory</div>
+        </div>
       </div>
 
-      <div class="divider"></div>
-      <div class="panel-title" style="margin-bottom:10px;">System Log</div>
-      <div class="log-mini mono" id="sysLog"></div>
+      <details class="log-details" open>
+        <summary>System Log</summary>
+        <div class="log-mini mono" id="sysLog"></div>
+      </details>
     </div>
 
     <!-- CENTER PANEL -->
     <div class="panel core-panel">
-      <div class="core-status"><span class="dot"></span><span id="coreStatusLbl">IDLE</span></div>
+      <div class="core-status"><span class="dot"></span><span id="coreStatusLbl">Idle</span></div>
       <div class="core-wrap" id="coreWrap">
-        <svg viewBox="0 0 200 200">
-          <circle class="ring-ticks" cx="100" cy="100" r="94" fill="none" stroke="var(--line-bright)" stroke-width="1" stroke-dasharray="1 7"/>
-          <circle class="ring-outer" cx="100" cy="100" r="80" fill="none" stroke="var(--cyan-dim)" stroke-width="1.2" stroke-dasharray="120 20 4 20"/>
-          <circle class="ring-mid" cx="100" cy="100" r="62" fill="none" stroke="var(--cyan)" stroke-width="1.6" stroke-dasharray="8 6" opacity="0.7"/>
+        <svg class="bezel" viewBox="0 0 200 200">
+          <circle class="bezel-ring" cx="100" cy="100" r="96" fill="none" stroke="var(--line-bright)" stroke-width="1" stroke-dasharray="1 7"/>
         </svg>
         <div class="core-center" id="coreCenter"></div>
+        <button class="core-mic-btn" id="micBtn" title="Speak a command" aria-label="Speak a command">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+          </svg>
+        </button>
       </div>
-      <div class="core-hint" id="coreHint">Type a command below, or press <b>the mic</b> to speak.</div>
+      <div class="core-hint" id="coreHint">Tap the <b>glowing core</b> to speak, or type a command below.</div>
     </div>
 
     <!-- RIGHT PANEL -->
@@ -481,13 +620,6 @@
   <div class="cmd-bar">
     <span class="caret mono">&gt;</span>
     <input id="cmdInput" class="mono" type="text" placeholder="Ask JARVIS anything…" autocomplete="off" />
-    <button class="mic-btn" id="micBtn" title="Speak a command" aria-label="Speak a command">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-        <line x1="12" y1="19" x2="12" y2="23"></line>
-      </svg>
-    </button>
     <button class="mic-btn active" id="speakBtn" title="Voice replies: on" aria-label="Toggle spoken replies">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
@@ -505,6 +637,7 @@
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
   // Point this at wherever jarvis_server.py is running.
@@ -549,17 +682,19 @@
   }
   bootLines.forEach((l, i) => setTimeout(() => logLine(l), i * 260));
 
-  // ---- diagnostics drift ----
-  function jitter(el, bar, base, range){
-    const val = Math.max(3, Math.min(99, base + (Math.random()*range - range/2)));
-    el.textContent = Math.round(val) + '%';
-    bar.style.width = val + '%';
-    return val;
+  // ---- diagnostics: radial gauges ----
+  const CIRC = 314.159;
+  function setGauge(id, pct){
+    pct = Math.max(3, Math.min(100, pct));
+    document.getElementById(id + '-num').textContent = Math.round(pct) + '%';
+    document.getElementById(id + '-arc').style.strokeDashoffset = CIRC * (1 - pct / 100);
   }
+  function jitter(base, range){ return base + (Math.random() * range - range / 2); }
+  setGauge('power', 91); setGauge('load', 18); setGauge('net', 98); setGauge('mem', 64);
   setInterval(() => {
-    jitter(document.getElementById('d-power'), document.getElementById('b-power'), 91, 6);
-    jitter(document.getElementById('d-net'), document.getElementById('b-net'), 98, 4);
-    jitter(document.getElementById('d-mem'), document.getElementById('b-mem'), 64, 10);
+    setGauge('power', jitter(91, 6));
+    setGauge('net', jitter(98, 4));
+    setGauge('mem', jitter(64, 10));
   }, 2600);
 
   // ---- conversation ----
@@ -604,22 +739,21 @@
   }
 
   // Strips markdown syntax so replies read as clean plain text -- the HUD
-  // is a plain-text terminal, not a markdown renderer, and raw ** / # / `
-  // characters both look bad on screen and get read aloud awkwardly.
+  // is a plain-text terminal, not a markdown renderer.
   function cleanText(text){
     if (!text) return text;
     let t = text;
-    t = t.replace(/```[\s\S]*?```/g, m => m.replace(/```/g, ''));   // code fences
-    t = t.replace(/`([^`]+)`/g, '$1');                               // inline code
-    t = t.replace(/^#{1,6}\s+/gm, '');                                // headers
-    t = t.replace(/\*\*\*(.+?)\*\*\*/g, '$1');                        // bold+italic
-    t = t.replace(/\*\*(.+?)\*\*/g, '$1');                            // bold
-    t = t.replace(/(?<!\*)\*(?!\*)([^*\n]+?)\*(?!\*)/g, '$1');        // italic *x*
-    t = t.replace(/__(.+?)__/g, '$1');                                // bold __x__
-    t = t.replace(/(?<!_)_(?!_)([^_\n]+?)_(?!_)/g, '$1');             // italic _x_
-    t = t.replace(/^\s*[-*+]\s+/gm, '\u2022 ');                       // bullets -> •
-    t = t.replace(/^\s*\d+\.\s+/gm, (m) => m.trim() + ' ');           // "1. " stays, tidy spacing
-    t = t.replace(/\n{3,}/g, '\n\n');                                 // collapse blank lines
+    t = t.replace(/```[\s\S]*?```/g, m => m.replace(/```/g, ''));
+    t = t.replace(/`([^`]+)`/g, '$1');
+    t = t.replace(/^#{1,6}\s+/gm, '');
+    t = t.replace(/\*\*\*(.+?)\*\*\*/g, '$1');
+    t = t.replace(/\*\*(.+?)\*\*/g, '$1');
+    t = t.replace(/(?<!\*)\*(?!\*)([^*\n]+?)\*(?!\*)/g, '$1');
+    t = t.replace(/__(.+?)__/g, '$1');
+    t = t.replace(/(?<!_)_(?!_)([^_\n]+?)_(?!_)/g, '$1');
+    t = t.replace(/^\s*[-*+]\s+/gm, '\u2022 ');
+    t = t.replace(/^\s*\d+\.\s+/gm, (m) => m.trim() + ' ');
+    t = t.replace(/\n{3,}/g, '\n\n');
     return t.trim();
   }
 
@@ -627,7 +761,7 @@
     const text = cleanText(rawText);
     const wrap = addMsg(who, '');
     const body = wrap.querySelector('.text');
-    const speed = 16; // ms per character -- lower = faster
+    const speed = 16;
     let i = 0;
     (function step(){
       body.textContent = text.slice(0, i);
@@ -647,10 +781,10 @@
   }
 
   function setBusy(isBusy){
-    coreWrap.classList.toggle('listening', isBusy);
-    coreStatusLbl.textContent = isBusy ? 'PROCESSING' : 'IDLE';
+    setCoreActive(isBusy);
+    coreStatusLbl.textContent = isBusy ? 'Processing' : 'Idle';
     statusVal.textContent = isBusy ? 'Active' : 'Standby';
-    statusVal.style.color = isBusy ? 'var(--cyan)' : 'var(--amber)';
+    statusVal.style.color = isBusy ? 'var(--teal)' : 'var(--alert)';
   }
 
   // ---- backend calls ----
@@ -738,9 +872,9 @@
     if (chosenVoice) utter.voice = chosenVoice;
     utter.rate = 1.0;
     utter.pitch = 0.92;
-    utter.onstart = () => coreWrap.classList.add('listening');
-    utter.onend = () => coreWrap.classList.remove('listening');
-    utter.onerror = () => coreWrap.classList.remove('listening');
+    utter.onstart = () => setCoreActive(true);
+    utter.onend = () => setCoreActive(false);
+    utter.onerror = () => setCoreActive(false);
     window.speechSynthesis.speak(utter);
   }
 
@@ -766,8 +900,8 @@
     recognition.onstart = () => {
       recognizing = true;
       micBtn.classList.add('active');
-      coreWrap.classList.add('listening');
-      coreStatusLbl.textContent = 'LISTENING';
+      setCoreActive(true);
+      coreStatusLbl.textContent = 'Listening';
       coreHint.innerHTML = 'Listening&hellip; speak your command.';
       logLine('Voice input started');
     };
@@ -786,9 +920,9 @@
     recognition.onend = () => {
       recognizing = false;
       micBtn.classList.remove('active');
-      if (!coreWrap.classList.contains('listening') || coreStatusLbl.textContent === 'LISTENING') {
-        coreWrap.classList.remove('listening');
-        coreStatusLbl.textContent = 'IDLE';
+      if (coreStatusLbl.textContent === 'Listening') {
+        setCoreActive(false);
+        coreStatusLbl.textContent = 'Idle';
       }
       coreHint.innerHTML = 'Type a command below, or press <b>the mic</b> to speak.';
     };
@@ -804,8 +938,160 @@
     micBtn.title = 'Speech recognition not supported in this browser (try Chrome or Edge)';
   }
 
+  // ---- 3D holographic core ----
+  let renderer, scene, camera, coreRotSpeed = 0.003;
+  let camZ = 8.5, targetCamZ = 4.2;
+  let mouseX = 0, mouseY = 0;
+  const coreObjects = [];
+  const coreMaterials = [];
+  const coreEmissives = [];
+  const coreLights = [];
+  const BRASS = 0xd9a962, TEAL = 0x4ad3c4;
+
+  function initCore3D(){
+    if (typeof THREE === 'undefined') return;
+    const canvas = document.createElement('canvas');
+    canvas.id = 'coreCanvas';
+    coreWrap.appendChild(canvas);
+
+    renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    camera.position.set(0, 0, camZ);
+
+    // lighting -- gives the wireframe cage and rings real shading instead of flat lines
+    const keyLight = new THREE.PointLight(BRASS, 1.4, 12);
+    keyLight.position.set(2.2, 1.6, 3);
+    scene.add(keyLight);
+    const fillLight = new THREE.PointLight(TEAL, 0.7, 12);
+    fillLight.position.set(-2, -1.4, 2.4);
+    scene.add(fillLight);
+    const ambient = new THREE.AmbientLight(0xffffff, 0.18);
+    scene.add(ambient);
+    coreLights.push(keyLight, fillLight);
+
+    // lit core sphere sitting inside the wireframe cage
+    const sphereGeo = new THREE.SphereGeometry(0.5, 48, 48);
+    const sphereMat = new THREE.MeshStandardMaterial({
+      color: BRASS, emissive: BRASS, emissiveIntensity:0.9,
+      roughness:0.28, metalness:0.55, transparent:true, opacity:0.92
+    });
+    const coreSphere = new THREE.Mesh(sphereGeo, sphereMat);
+    scene.add(coreSphere);
+    coreMaterials.push(sphereMat);
+    coreEmissives.push(sphereMat);
+    coreObjects.push({mesh: coreSphere, speed: 0.4, axis:'y'});
+
+    // wireframe cage
+    const icoGeo = new THREE.IcosahedronGeometry(1.05, 1);
+    const icoEdges = new THREE.EdgesGeometry(icoGeo);
+    const icoMat = new THREE.LineBasicMaterial({color: BRASS, transparent:true, opacity:0.85});
+    const ico = new THREE.LineSegments(icoEdges, icoMat);
+    scene.add(ico);
+    coreMaterials.push(icoMat);
+    coreObjects.push({mesh: ico, speed: 1, axis:'y'});
+
+    // orbit rings, lit so they catch the key/fill lights
+    [[1.55, 0.012, 0.55 * Math.PI, -0.6], [1.8, 0.01, 0.3 * Math.PI, 0.8]].forEach((cfg, i) => {
+      const torusGeo = new THREE.TorusGeometry(cfg[0], cfg[1], 8, 96);
+      const mat = new THREE.MeshStandardMaterial({color: i === 0 ? TEAL : BRASS, transparent:true, opacity:0.6, roughness:0.4, metalness:0.5});
+      const ring = new THREE.Mesh(torusGeo, mat);
+      ring.rotation.x = cfg[2];
+      ring.rotation.y = i * 0.6;
+      scene.add(ring);
+      coreMaterials.push(mat);
+      coreObjects.push({mesh: ring, speed: cfg[3], axis:'z'});
+    });
+
+    // near particle shell
+    const particleCount = 160;
+    const positions = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount; i++) {
+      const r = 1.9 + Math.random() * 0.4;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos((Math.random() * 2) - 1);
+      positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+      positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+      positions[i * 3 + 2] = r * Math.cos(phi);
+    }
+    const pGeo = new THREE.BufferGeometry();
+    pGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const pMat = new THREE.PointsMaterial({color: TEAL, size:0.022, transparent:true, opacity:0.7});
+    const points = new THREE.Points(pGeo, pMat);
+    scene.add(points);
+    coreMaterials.push(pMat);
+    coreObjects.push({mesh: points, speed: 0.15, axis:'y'});
+
+    // distant starfield -- sold by the camera dolly-in on boot, gives real depth
+    const starCount = 260;
+    const starPositions = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount; i++) {
+      const r = 4.5 + Math.random() * 3.5;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos((Math.random() * 2) - 1);
+      starPositions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+      starPositions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+      starPositions[i * 3 + 2] = r * Math.cos(phi);
+    }
+    const starGeo = new THREE.BufferGeometry();
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+    const starMat = new THREE.PointsMaterial({color:0xffffff, size:0.012, transparent:true, opacity:0.35});
+    const stars = new THREE.Points(starGeo, starMat);
+    scene.add(stars);
+    coreObjects.push({mesh: stars, speed: 0.03, axis:'y'});
+
+    coreWrap.addEventListener('mousemove', (e) => {
+      const rect = coreWrap.getBoundingClientRect();
+      mouseX = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+      mouseY = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+    });
+    coreWrap.addEventListener('mouseleave', () => { mouseX = 0; mouseY = 0; });
+
+    resizeCore3D();
+    window.addEventListener('resize', resizeCore3D);
+    requestAnimationFrame(animateCore3D);
+  }
+
+  function resizeCore3D(){
+    if (!renderer) return;
+    const rect = coreWrap.getBoundingClientRect();
+    const size = Math.max(Math.round(rect.width), Math.round(rect.height)) || 300;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(size, size, true);
+    camera.aspect = 1;
+    camera.updateProjectionMatrix();
+  }
+
+  function animateCore3D(){
+    requestAnimationFrame(animateCore3D);
+    coreObjects.forEach(o => {
+      if (o.axis === 'z') { o.mesh.rotation.z += coreRotSpeed * o.speed; }
+      else { o.mesh.rotation.y += coreRotSpeed * o.speed; o.mesh.rotation.x += coreRotSpeed * o.speed * 0.4; }
+    });
+    // realistic camera dolly: eases toward targetCamZ every frame instead of snapping,
+    // so boot-up (far -> resting) and mic-activation (resting -> close) both feel like
+    // a real lens pulling focus rather than a CSS scale trick
+    camZ += (targetCamZ - camZ) * 0.045;
+    camera.position.z = camZ;
+    camera.position.x += (mouseX * 0.35 - camera.position.x) * 0.06;
+    camera.position.y += (-mouseY * 0.25 - camera.position.y) * 0.06;
+    camera.lookAt(0, 0, 0);
+    renderer.render(scene, camera);
+  }
+
+  function setCoreActive(isActive){
+    coreWrap.classList.toggle('active', isActive);
+    coreRotSpeed = isActive ? 0.009 : 0.003;
+    targetCamZ = isActive ? 3.35 : 4.2;
+    const target = isActive ? TEAL : BRASS;
+    coreMaterials.forEach(m => { if (m.color) m.color.set(target); });
+    coreEmissives.forEach(m => { if (m.emissive) m.emissive.set(target); });
+    coreLights.forEach((l, i) => l.color.set(i === 0 ? target : (isActive ? BRASS : TEAL)));
+  }
+
   // ---- boot ----
   async function boot(){
+    initCore3D();
     try {
       const res = await fetch(SERVER_URL + '/api/health');
       const data = await res.json();
