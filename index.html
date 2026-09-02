@@ -60,6 +60,24 @@
 
   .mono{ font-family:'IBM Plex Mono', monospace; }
 
+  #bootOverlay{
+    position:fixed; inset:0; z-index:50;
+    background:var(--void);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+    transition:opacity 0.6s ease, visibility 0.6s ease;
+  }
+  #bootOverlay.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+  .boot-mark{ font-size:30px; font-weight:700; letter-spacing:0.14em; color:var(--text); }
+  .boot-mark span{ color:var(--brass); }
+  .boot-line{
+    font-size:11.5px; letter-spacing:0.08em; color:var(--text-faint);
+    opacity:0; animation:bootFade 0.5s ease forwards;
+  }
+  @keyframes bootFade{ to{ opacity:1; } }
+  .boot-bar{ width:180px; height:2px; background:rgba(255,255,255,0.08); margin-top:6px; overflow:hidden; }
+  .boot-bar i{ display:block; height:100%; width:0%; background:linear-gradient(90deg, var(--brass-dim), var(--brass)); animation:bootFill 1.5s ease forwards; animation-delay:0.1s; }
+  @keyframes bootFill{ to{ width:100%; } }
+
   /* ================= SHELL ================= */
   .shell{
     position:relative;
@@ -552,6 +570,7 @@
         <div class="gauge">
           <svg viewBox="0 0 120 120">
             <circle class="gauge-track" cx="60" cy="60" r="50"/>
+            <circle cx="60" cy="60" r="42" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1" stroke-dasharray="1 6.5"/>
             <circle class="gauge-arc" id="power-arc" cx="60" cy="60" r="50" stroke="var(--brass)" stroke-dashoffset="28" transform="rotate(-90 60 60)"/>
           </svg>
           <div class="gauge-num" id="power-num">92%</div>
@@ -560,6 +579,7 @@
         <div class="gauge">
           <svg viewBox="0 0 120 120">
             <circle class="gauge-track" cx="60" cy="60" r="50"/>
+            <circle cx="60" cy="60" r="42" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1" stroke-dasharray="1 6.5"/>
             <circle class="gauge-arc" id="load-arc" cx="60" cy="60" r="50" stroke="var(--teal)" stroke-dashoffset="257" transform="rotate(-90 60 60)"/>
           </svg>
           <div class="gauge-num" id="load-num">18%</div>
@@ -568,6 +588,7 @@
         <div class="gauge">
           <svg viewBox="0 0 120 120">
             <circle class="gauge-track" cx="60" cy="60" r="50"/>
+            <circle cx="60" cy="60" r="42" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1" stroke-dasharray="1 6.5"/>
             <circle class="gauge-arc" id="net-arc" cx="60" cy="60" r="50" stroke="var(--brass)" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
           </svg>
           <div class="gauge-num" id="net-num">100%</div>
@@ -576,6 +597,7 @@
         <div class="gauge">
           <svg viewBox="0 0 120 120">
             <circle class="gauge-track" cx="60" cy="60" r="50"/>
+            <circle cx="60" cy="60" r="42" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1" stroke-dasharray="1 6.5"/>
             <circle class="gauge-arc" id="mem-arc" cx="60" cy="60" r="50" stroke="var(--teal)" stroke-dashoffset="113" transform="rotate(-90 60 60)"/>
           </svg>
           <div class="gauge-num" id="mem-num">64%</div>
@@ -655,6 +677,8 @@
   const sendBtn = document.getElementById('sendBtn');
   const micBtn = document.getElementById('micBtn');
   const speakBtn = document.getElementById('speakBtn');
+  const bootOverlay = document.getElementById('bootOverlay');
+  setTimeout(() => { bootOverlay && bootOverlay.classList.add('hide'); }, 1750);
 
   // ---- clock ----
   function tick(){
@@ -873,6 +897,7 @@
     utter.rate = 1.0;
     utter.pitch = 0.92;
     utter.onstart = () => setCoreActive(true);
+    utter.onboundary = () => { talkPulse = 1; };
     utter.onend = () => setCoreActive(false);
     utter.onerror = () => setCoreActive(false);
     window.speechSynthesis.speak(utter);
@@ -942,10 +967,12 @@
   let renderer, scene, camera, coreRotSpeed = 0.003;
   let camZ = 8.5, targetCamZ = 4.2;
   let mouseX = 0, mouseY = 0;
+  let talkPulse = 0, coreSphereRef = null;
   const coreObjects = [];
   const coreMaterials = [];
   const coreEmissives = [];
   const coreLights = [];
+  const coreGlowUniforms = [];
   const BRASS = 0xd9a962, TEAL = 0x4ad3c4;
 
   function initCore3D(){
@@ -981,6 +1008,53 @@
     coreMaterials.push(sphereMat);
     coreEmissives.push(sphereMat);
     coreObjects.push({mesh: coreSphere, speed: 0.4, axis:'y'});
+    coreSphereRef = coreSphere;
+
+    // fresnel-style rim glow shell wrapping the sphere -- reads as real light bleed
+    const glowUniforms = { glowColor: { value: new THREE.Color(BRASS) } };
+    const glowMat = new THREE.ShaderMaterial({
+      uniforms: glowUniforms,
+      vertexShader: `
+        varying vec3 vNormal;
+        void main(){
+          vNormal = normalize(normalMatrix * normal);
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform vec3 glowColor;
+        varying vec3 vNormal;
+        void main(){
+          float intensity = pow(0.62 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.8);
+          gl_FragColor = vec4(glowColor, clamp(intensity, 0.0, 1.0));
+        }
+      `,
+      side: THREE.BackSide,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending
+    });
+    const glowShell = new THREE.Mesh(new THREE.SphereGeometry(0.66, 48, 48), glowMat);
+    scene.add(glowShell);
+    coreObjects.push({mesh: glowShell, speed: 0.4, axis:'y'});
+    coreGlowUniforms.push(glowUniforms);
+
+    // soft additive bloom halo sitting behind the sphere
+    const glowTex = (function(){
+      const c = document.createElement('canvas'); c.width = c.height = 128;
+      const ctx = c.getContext('2d');
+      const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+      g.addColorStop(0, 'rgba(255,255,255,1)');
+      g.addColorStop(0.4, 'rgba(255,255,255,0.35)');
+      g.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, 128, 128);
+      return new THREE.CanvasTexture(c);
+    })();
+    const bloomMat = new THREE.SpriteMaterial({map: glowTex, color: BRASS, transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, opacity:0.8});
+    const bloomSprite = new THREE.Sprite(bloomMat);
+    bloomSprite.scale.set(2.4, 2.4, 1);
+    scene.add(bloomSprite);
+    coreMaterials.push(bloomMat);
 
     // wireframe cage
     const icoGeo = new THREE.IcosahedronGeometry(1.05, 1);
@@ -1050,6 +1124,33 @@
     resizeCore3D();
     window.addEventListener('resize', resizeCore3D);
     requestAnimationFrame(animateCore3D);
+    setTimeout(scheduleArcs, 2000);
+  }
+
+  // occasional jagged energy discharge jumping across the cage -- a signature
+  // flourish rather than constant motion, spaced out randomly
+  function spawnArc(){
+    if (!scene) return;
+    const segs = 7;
+    const pts = [];
+    const startAngle = Math.random() * Math.PI * 2;
+    const endAngle = startAngle + (Math.random() * 1.4 + 0.6) * (Math.random() < 0.5 ? 1 : -1);
+    const r1 = 1.05, r2 = Math.random() < 0.5 ? 1.55 : 1.8;
+    for (let i = 0; i <= segs; i++){
+      const t = i / segs;
+      const ang = startAngle + (endAngle - startAngle) * t;
+      const r = r1 + (r2 - r1) * t + (Math.random() - 0.5) * 0.12;
+      pts.push(new THREE.Vector3(Math.cos(ang) * r, Math.sin(ang) * r * 0.6, (Math.random() - 0.5) * 0.5));
+    }
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const mat = new THREE.LineBasicMaterial({color: coreWrap.classList.contains('active') ? TEAL : BRASS, transparent:true, opacity:0.9});
+    const line = new THREE.Line(geo, mat);
+    scene.add(line);
+    setTimeout(() => { scene.remove(line); geo.dispose(); mat.dispose(); }, 220);
+  }
+  function scheduleArcs(){
+    spawnArc();
+    setTimeout(scheduleArcs, 3200 + Math.random() * 3600);
   }
 
   function resizeCore3D(){
@@ -1076,6 +1177,9 @@
     camera.position.x += (mouseX * 0.35 - camera.position.x) * 0.06;
     camera.position.y += (-mouseY * 0.25 - camera.position.y) * 0.06;
     camera.lookAt(0, 0, 0);
+    // voice-reactive pulse: ticks up on each spoken word boundary, decays each frame
+    talkPulse *= 0.88;
+    if (coreSphereRef) { const s = 1 + talkPulse * 0.1; coreSphereRef.scale.set(s, s, s); }
     renderer.render(scene, camera);
   }
 
@@ -1086,6 +1190,7 @@
     const target = isActive ? TEAL : BRASS;
     coreMaterials.forEach(m => { if (m.color) m.color.set(target); });
     coreEmissives.forEach(m => { if (m.emissive) m.emissive.set(target); });
+    coreGlowUniforms.forEach(u => u.glowColor.value.set(target));
     coreLights.forEach((l, i) => l.color.set(i === 0 ? target : (isActive ? BRASS : TEAL)));
   }
 
