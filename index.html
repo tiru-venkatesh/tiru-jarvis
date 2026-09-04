@@ -79,6 +79,52 @@
   .boot-bar i{ display:block; height:100%; width:0%; background:linear-gradient(90deg, var(--brass-dim), var(--brass)); animation:bootFill 1.5s ease forwards; animation-delay:0.1s; }
   @keyframes bootFill{ to{ width:100%; } }
 
+  /* ---------- LOGIN OVERLAY ---------- */
+  #loginOverlay{
+    position:fixed; inset:0; z-index:60;
+    background:rgba(7,8,11,0.94);
+    display:flex; align-items:center; justify-content:center;
+    transition:opacity 0.4s ease, visibility 0.4s ease;
+  }
+  #loginOverlay.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+  .login-card{
+    width:min(340px, 86vw);
+    border:1px solid var(--line-bright);
+    background:linear-gradient(180deg, var(--panel), var(--panel-2));
+    padding:30px 26px;
+    text-align:center;
+    clip-path:polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  }
+  .login-title{ font-size:22px; font-weight:700; letter-spacing:0.12em; color:var(--text); margin-bottom:4px; }
+  .login-title span{ color:var(--brass); }
+  .login-sub{ font-size:11px; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:22px; }
+  .login-card input{
+    width:100%;
+    background:var(--panel);
+    border:1px solid var(--line-bright);
+    color:var(--text);
+    font-size:13px;
+    padding:11px 12px;
+    outline:none;
+    margin-bottom:10px;
+  }
+  .login-card input::placeholder{ color:var(--text-faint); }
+  .login-card button{
+    width:100%;
+    padding:11px 0;
+    border:1px solid var(--teal);
+    background:rgba(74,211,196,0.08);
+    color:var(--teal);
+    font-family:'Space Grotesk', sans-serif;
+    font-size:13px;
+    letter-spacing:0.04em;
+    cursor:pointer;
+    transition:background 0.2s ease;
+  }
+  .login-card button:hover{ background:rgba(74,211,196,0.18); }
+  .login-card button:disabled{ opacity:0.5; cursor:default; }
+  .login-status{ margin-top:12px; font-size:11px; color:var(--text-dim); min-height:16px; line-height:1.5; }
+
   /* ================= SHELL ================= */
   .shell{
     position:relative;
@@ -536,6 +582,16 @@
   <div class="boot-bar"><i></i></div>
 </div>
 
+<div id="loginOverlay" class="hide">
+  <div class="login-card">
+    <div class="login-title">J<span>·</span>A<span>·</span>R<span>·</span>V<span>·</span>I<span>·</span>S</div>
+    <div class="login-sub mono">Identity verification required</div>
+    <input id="loginEmail" class="mono" type="email" placeholder="you@example.com" autocomplete="email" />
+    <button id="loginSendBtn" class="mono">Send access link</button>
+    <div id="loginStatus" class="login-status mono"></div>
+  </div>
+</div>
+
 <div class="shell">
 
   <!-- TOP BAR -->
@@ -661,10 +717,18 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
   // Point this at wherever jarvis_server.py is running.
   const SERVER_URL = 'https://jarvis-backend-demo.onrender.com';
+
+  // ---- Supabase auth config ----
+  // Fill these in from your Supabase project: Project Settings -> API.
+  // Both are safe to expose client-side (never put the secret/service key or
+  // the JWT secret here -- those stay server-side only, on Render).
+  const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';            // e.g. https://xxxxxxxx.supabase.co
+  const SUPABASE_PUBLISHABLE_KEY = 'YOUR_SUPABASE_PUBLISHABLE_KEY'; // sb_publishable_... (or the legacy anon key)
 
   const clock = document.getElementById('clock');
   const dateStr = document.getElementById('dateStr');
@@ -812,11 +876,79 @@
     statusVal.style.color = isBusy ? 'var(--teal)' : 'var(--alert)';
   }
 
+  // ---- Supabase auth (magic link) ----
+  // require_auth on the backend expects a Supabase session JWT as
+  // "Authorization: Bearer <access_token>", verified with the project's
+  // legacy HS256 JWT secret. This flow gets that token via Supabase's
+  // built-in email magic link -- no password to manage, and the token
+  // Supabase issues already carries aud:"authenticated", which is what
+  // the backend checks.
+  const loginOverlay = document.getElementById('loginOverlay');
+  const loginEmail = document.getElementById('loginEmail');
+  const loginSendBtn = document.getElementById('loginSendBtn');
+  const loginStatus = document.getElementById('loginStatus');
+  let accessToken = null;
+  let supabaseClient = null;
+
+  const supabaseConfigured = SUPABASE_URL.startsWith('http') && SUPABASE_PUBLISHABLE_KEY && !SUPABASE_PUBLISHABLE_KEY.startsWith('YOUR_');
+  if (window.supabase && supabaseConfigured) {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+  }
+
+  function showLogin(msg){
+    loginOverlay.classList.remove('hide');
+    if (msg) loginStatus.textContent = msg;
+  }
+  function hideLogin(){ loginOverlay.classList.add('hide'); }
+
+  async function initAuth(){
+    if (!supabaseClient) {
+      showLogin('Supabase not configured yet -- set SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY in this file.');
+      return;
+    }
+    const { data } = await supabaseClient.auth.getSession();
+    if (data.session) {
+      accessToken = data.session.access_token;
+      hideLogin();
+      logLine('Signed in as ' + data.session.user.email);
+    } else {
+      showLogin();
+    }
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      accessToken = session ? session.access_token : null;
+      if (session) {
+        hideLogin();
+        logLine('Signed in as ' + session.user.email);
+      } else if (event === 'SIGNED_OUT') {
+        showLogin();
+      }
+    });
+  }
+
+  if (loginSendBtn) {
+    loginSendBtn.addEventListener('click', async () => {
+      const email = loginEmail.value.trim();
+      if (!email) { loginStatus.textContent = 'Enter your email first.'; return; }
+      if (!supabaseClient) { loginStatus.textContent = 'Supabase not configured yet.'; return; }
+      loginSendBtn.disabled = true;
+      loginStatus.textContent = 'Sending…';
+      const { error } = await supabaseClient.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: window.location.href }
+      });
+      loginSendBtn.disabled = false;
+      loginStatus.textContent = error ? ('Error: ' + error.message) : 'Check your email for the access link, then return to this tab.';
+    });
+    loginEmail.addEventListener('keydown', (e) => { if (e.key === 'Enter') loginSendBtn.click(); });
+  }
+
   // ---- backend calls ----
   async function callServer(path, payload){
+    const headers = {'Content-Type': 'application/json'};
+    if (accessToken) headers['Authorization'] = 'Bearer ' + accessToken;
     const res = await fetch(SERVER_URL + path, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers,
       body: JSON.stringify(payload || {})
     });
     const data = await res.json().catch(() => ({}));
@@ -1198,6 +1330,7 @@
   // ---- boot ----
   async function boot(){
     initCore3D();
+    await initAuth();
     try {
       const res = await fetch(SERVER_URL + '/api/health');
       const data = await res.json();
